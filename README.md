@@ -103,6 +103,7 @@ _Data2 = Status Byte_
 _Data4 = Usually 0xBE_
 
 **Examples:**
+
 | TX | RX | Result |
 | --- | --- | --- |
 | 0xA5 0x02 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x02 0x00 **0x00** 0x00 0xBE 0x00 | Camera Idle |
@@ -129,6 +130,7 @@ _Data2 = Usually 0x01_
 _Data4 = Usually 0x00_
 
 **Examples:**
+
 | TX | RX | Description |
 | --- | --- | --- |
 | 0xA5 0x0B 0x00 0x00 0x03 0xF9 | 0xA5 0xF9 0x0B 0xF9 0x01 0xF9 0x00 0xF9 | Light Frame Raw/Color 1x1 Binning |
@@ -164,6 +166,7 @@ Units are milliseconds when time is less than 10s.<br>
 Time value seems offset by some random value, which seems to change after a restart of MaximDL. One example uses a setpoint of 6696.9s in MaximDL which produces a packet value of 0xfffe.<br>
 
 **Example:**
+
 | TX | RX | Description |
 | --- | --- | --- |
 | 0xA5 0x03 0x01 0x04 0x92 0x02 | 0xA5 0x02 0x03 0x02 0x01 0x02 0x00 0x02 | 120s Light Frame Raw/Color 1x1 Binning |
