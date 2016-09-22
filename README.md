@@ -140,7 +140,7 @@ _Data4 = Usually 0x00_
 &nbsp;
 
 ### Start Capture
-_Set Readout speed, Shutter time, and other data_
+_Set readout speed, shutter time, and other data_
 
 **Command:** ```0x03```
 <br>
@@ -170,3 +170,94 @@ Time value seems offset by some random value, which seems to change after a rest
 | TX | RX | Description |
 | --- | --- | --- |
 | 0xA5 0x03 0x01 0x04 0x92 0x02 | 0xA5 0x02 0x03 0x02 0x01 0x02 0x00 0x02 | 120s Light Frame Raw/Color 1x1 Binning |
+
+&nbsp;
+
+### Start Image Transfer/Download
+_Tell the camera we're ready to copy the image data_
+
+**Command:** ```0x04```
+<br>
+**TX Data:** ```0x00 0x00 0x00 0x00```
+<br>
+**RX Data:** ```0xA5 Data0 0x04 Data1 Data2 Data3 Data4 Data5```
+
+_Data0, Data1, Data3, Data4, and Data5 = Usually 0x00_
+
+_Data2 = Usually 0x01_
+
+**Example:**
+
+| TX | RX |
+| --- | --- | 
+| 0xA5 0x04 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x04 0x00 0x01 0x00 0x00 0x00 |
+
+&nbsp;
+
+### Abort Capture
+_Stop imaging_
+
+**Command:** ```0x05```
+<br>
+**TX Data:** ```0x00 0x00 0x00 0x00```
+<br>
+**RX Data:** ```0xA5 Data0 0x05 Data1 Data2 Data3 Data4 Data5```
+
+_Data0, Data1, Data3, Data4, and Data5 = Usually 0x00_
+
+_Data2 = Usually 0x01_
+
+**Example:**
+
+| TX | RX |
+| --- | --- |
+| 0xA5 0x05 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x05 0x00 0x01 0x00 0x00 0x00 |
+
+&nbsp;
+
+### Set DIO
+_Turn on/off PEC cooler and set fan speed_
+
+**Command:** ```0x0C```
+<br>
+**TX Data:** ```Cmd0 0x00 0x00 0x00```
+
+| Cmd0 |
+| ---- |
+| Bits 7-2 = Always 0 |
+| Bit 1 = Fan Low/High (1=High) |
+| Bit 0 = Cooler Enable (1=On) |
+<br>
+**RX Data:** ```0xA5 Data0 0x0C Data1 Data2 Data3 Data4 Data5```
+
+_Data0, Data1, Data2, Data3, Data4, and Data5 = Usually 0x00_
+
+**Example:**
+
+| TX | RX | Description |
+| --- | --- | --- |
+| 0xA5 0x0C 0x03 0x00 0x00 0x00 | 0xA5 0x00 0x0C 0x00 0x00 0x00 0x00 0x00 | Set Fan High and Cooler On |
+
+&nbsp;
+
+### Unknown Command 9
+_Read current timer tick?_
+
+**Command:** ```0x09```
+<br>
+**TX Data:** ```0x00 0x00 0x00 0x00```
+<br>
+**RX Data:** ```0xA5 Data0 0x09 Data1 Data2 Data3 Data4 Data5```
+
+_Data0, Data1, Data3, and Data5 = Usually 0x00_
+
+_Data2 = Ever incrementing value
+
+_Data4 = Ever changing value (could be lower byte of fast timer)
+
+**Example:**
+
+| TX | RX |
+| --- | --- |
+| 0xA5 0x09 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x09 0x00 **0xE2** 0x00 **0x7A** 0x00 |
+
