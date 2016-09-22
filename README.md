@@ -88,59 +88,82 @@ Image transfer packets use the following format (no ID or ACK):
 ## Command Reference
 
 #### Get Camera Status
-_Return isCapturing flag and other data_
+_Return status byte and other data_
 
-```
-Command    0x02
-Data       0x00 0x00 0x00 0x00
-Example 1  0xA5 0x00 0x02 0x00 0x00 0x00 0xBE 0x00 (Camera Idle)
-Example 2  0xA5 0x00 0x02 0x00 0x01 0x00 0xBE 0x00 (Camera Exposing)
-Example 3  0xA5 0x00 0x02 0x00 0x02 0x00 0xBE 0x00 (Frame Ready)
-```
+**Command:** ```0x02```
+<br>
+**TX Data:** ```0x00 0x00 0x00 0x00```
+<br>
+**RX Data:** ```0xA5 Data0 0x02 Data1 Data2 Data3 Data4 Data5```
+
+_Data0, Data1, Data3, and Data5 = Usually 0x00._
+
+_Data2 = Status Byte_
+
+_Data4 = Usually 0xBE_
+
+**Examples:**
+| TX | RX | Result |
+| --- | --- | --- |
+| 0xA5 0x02 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x02 0x00 **0x00** 0x00 0xBE 0x00 | Camera Idle |
+| 0xA5 0x02 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x02 0x00 **0x01** 0x00 0xBE 0x00 | Camera Exposing |
+| 0xA5 0x02 0x00 0x00 0x00 0x00 | 0xA5 0x00 0x02 0x00 **0x02** 0x00 0xBE 0x00 | Frame Ready |
 
 &nbsp;
 
 #### Set Capture Mode and Frame Size
 _Define the subframe (may also set a binning flag, not sure yet)_
 
-```
-Command    0x0B
-Data       0xXX 0xXX 0xXX 0xXX
-TX Data Bytes are not fully decoded yet
-Example 1 (Light Frame Raw/Color 1x1 Binning)
- TX: 0xA5 0x0B 0x00 0x00 0x03 0xF9
- RX: 0xA5 0xF9 0x0B 0xF9 0x01 0xF9 0x00 0xF9
-Example 2 (Light Frame Mono 2x2 Binning)
- TX: 0xA5 0x0B 0x00 0x00 0x03 0xFA
- RX: 0xA5 0xFA 0x0B 0xFA 0x01 0xFA 0x00 0xFA
-Example 3 (Light Frame Mono 2x2 Binning, subframe 95,338 to 706,444)
- TX: 0xA5 0x0B 0x01 0x52 0x00 0x70
- RX: 0xA5 0x70 0x0B 0x70 0x01 0x70 0x00 0x70
-RX Data Bytes are not fully decoded yet
-```
+**Command:** ```0x0B```
+<br>
+**TX Data:** ```Cmd0 Cmd1 Cmd2 Cmd3```
+<br>
+**RX Data:** ```0xA5 Data0 0x0B Data1 Data2 Data3 Data4 Data5```
+
+Cmd0-3 = Unknown definition of capture frame and possibly binning mode
+
+_Data0, Data1, Data3, and Data5 = Usually same as Cmd3 byte._
+
+_Data2 = Usually 0x01_
+
+_Data4 = Usually 0x00_
+
+**Examples:**
+| TX | RX | Description |
+| --- | --- | --- |
+| 0xA5 0x0B 0x00 0x00 0x03 0xF9 | 0xA5 0xF9 0x0B 0xF9 0x01 0xF9 0x00 0xF9 | Light Frame Raw/Color 1x1 Binning |
+| 0xA5 0x0B 0x00 0x00 0x03 0xFA | 0xA5 0xFA 0x0B 0xFA 0x01 0xFA 0x00 0xFA | Light Frame Mono 2x2 Binning |
+| 0xA5 0x0B 0x01 0x52 0x00 0x70 | 0xA5 0x70 0x0B 0x70 0x01 0x70 0x00 0x70 | Light Frame Mono 2x2 Binning, subframe 95,338 to 706,444 |
 
 &nbsp;
 
 #### Start Capture
 _Set Readout speed, Shutter time, and other data_
 
-```
-Command    0x03
-Data       0x0X 0xXX 0xXX 0x0X
-```
+**Command:** ```0x03```
+<br>
+**TX Data:** ```Cmd0 Cmd1 Cmd2 Cmd3```
 
-| Bits |                 Byte 1            | Byte 2 & Byte 3  |       Byte 4        |
-| ---  | --------------------------------- |:----------------:|:-------------------:|
-| Bit  |    7-4          3-1         0     | 0x0001 to 0xFFFF | 0x00=Time <= 8.000s |
-|      | Always 0   Readout Speed   Units  |    Time value    | 0x02=Time >= 8.001s |
-|      |           0,2,4,6,8,A,C,E  1=0.1s |                  | 0x03=2x2 Binning    |
-|      |           Fast ..... Slow  0=ms   |                  |   More??            |
+| Cmd0 | Cmd1 & Cmd2 | Cmd3 |
+| ------------------- |:----------------:|:-------------------:|
+| Bits 7-4 = Always 0 | 0x0001 to 0xFFFF | 0x00=Time <= 8.000s |
+| Bits 3-1 = Readout Speed (Fast=0...Slow=7) | Time value | 0x02=Time >= 8.001s |
+| Bit 0 = Time Units (0=ms, 1=0.1s) |                  | 0x03=2x2 Binning?   |
+<br>
+**RX Data:** ```0xA5 Data0 0x0B Data1 Data2 Data3 Data4 Data5```
 
-```
-Units are milliseconds when time is less than 10s.
-Time value seems offset by some random value, MaximDL setpoint is 6696.9s and packet value is 0xfffe.
-Example 1 (120s Light Frame Raw/Color 1x1 Binning)
- TX: 0xA5 0x03 0x01 0x04 0x92 0x02
- RX: 0xA5 0x02 0x03 0x02 0x01 0x02 0x00 0x02
-RX Data Bytes are not fully decoded yet
-```
+_Data0, Data1, Data3, and Data5 = Usually same as Cmd3 byte._
+
+_Data2 = Usually 0x01_
+
+_Data4 = Usually 0x00_
+
+**Description:**
+
+Units are milliseconds when time is less than 10s.<br>
+Time value seems offset by some random value, which seems to change after a restart of MaximDL. One example uses a setpoint of 6696.9s in MaximDL which produces a packet value of 0xfffe.<br>
+
+**Example:**
+| TX | RX | Description |
+| --- | --- | --- |
+| 0xA5 0x03 0x01 0x04 0x92 0x02 | 0xA5 0x02 0x03 0x02 0x01 0x02 0x00 0x02 | 120s Light Frame Raw/Color 1x1 Binning |
