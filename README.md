@@ -87,7 +87,7 @@ Image transfer packets use the following format (no ID or ACK):
 
 ## Command Reference
 
-#### Get Camera Status
+### Get Camera Status
 _Return status byte and other data_
 
 **Command:** ```0x02```
@@ -112,7 +112,7 @@ _Data4 = Usually 0xBE_
 
 &nbsp;
 
-#### Set Capture Mode and Frame Size
+### Set Capture Mode and Frame Size
 _Define the subframe (may also set a binning flag, not sure yet)_
 
 **Command:** ```0x0B```
@@ -139,7 +139,7 @@ _Data4 = Usually 0x00_
 
 &nbsp;
 
-#### Start Capture
+### Start Capture
 _Set Readout speed, Shutter time, and other data_
 
 **Command:** ```0x03```
