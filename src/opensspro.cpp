@@ -100,37 +100,41 @@ void SSPRO::Disconnect()
     DEBUG("Done\n");
 }
 
+bool SSPRO::IsConnected()
+{
+    return (this->device != NULL);
+}
+
 void SSPRO::GetStatus()
 {
     DEBUG("Requesting camera status...");
-    int txCount;
-    unsigned char data[6] = { START_BYTE, USB_REQ_STATUS, 0x00, 0x00, 0x00, 0x00 };
-    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
-    if (result < 0)
-        ERROR("Failed to get status, result = %d", result);
+    if (!this->SendCMD( USB_REQ_STATUS, 0x00, 0x00, 0x00, 0x00 ))
+        ERROR("Failed to get status");
     else
         DEBUG("Done\n");
-
-    this->GetCMDResult(USB_REQ_STATUS);
 }
 
 void SSPRO::SetupFrame()
 {
     DEBUG("Setting up frame...");
-    int txCount;
-    unsigned char data[6] = { START_BYTE, USB_REQ_SET_FRAME, 0x00, 0x00, 0x03, 0xF9 };
-    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
-    if (result < 0)
-        ERROR("Failed to setup frame, result = %d", result);
+    if (!this->SendCMD( USB_REQ_SET_FRAME, 0x00, 0x00, 0x03, 0xF9 ))
+        ERROR("Failed to setup frame");
     else
         DEBUG("Done\n");
-
-    this->GetCMDResult(USB_REQ_SET_FRAME);
 }
 
-bool SSPRO::IsConnected()
+bool SSPRO::SendCMD(unsigned char cmd, unsigned char data0, unsigned char data1, unsigned char data2, unsigned char data3)
 {
-    return (this->device != NULL);
+    int txCount;
+    unsigned char data[6] = { START_BYTE, cmd, data0, data1, data2, data3 };
+    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
+    if (result < 0)
+        return false;
+
+    if (txCount != 6)
+        return false;
+
+    return this->GetCMDResult(cmd);
 }
 
 bool SSPRO::GetCMDResult(unsigned char cmd)
@@ -224,17 +228,21 @@ struct rawImage* SSPRO::Capture(int ms)
     if (!this->StartCapture(ms))
         return NULL;
 
-    // Wait capture time + 100 ms
-    usleep((ms+100)*1000);
+    usleep((ms+100)*1000); // Wait capture time + 100 ms
 
-    // while status == busy
-    while (!this->frameReady)
+    int count = 0;
+    while (!this->frameReady && count++ < 10)
     {
         this->GetStatus();
-        usleep(500*1000);
+        usleep(500*1000); // Wait 500 ms
     }
 
-    this->DownloadFrame();
+    if (count >= 10)
+        return NULL;
+
+    if (!this->DownloadFrame())
+        return NULL;
+
     return &lastImage;
 }
 
@@ -243,50 +251,37 @@ bool SSPRO::StartCapture(int ms)
     this->SetupFrame();
 
     DEBUG("Starting capture...");
-    int txCount;
-    unsigned char data[6] = { START_BYTE, USB_REQ_CAPTURE, 0x00, 0x26, 0x39, 0x02 }; // 10s Color 1x1 binning
-    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
-    if (result < 0)
+    if (!this->SendCMD( USB_REQ_CAPTURE, 0x00, 0x26, 0x39, 0x02 )) // 10s Color 1x1 binning
     {
-        ERROR("Failed to capture, result = %d", result);
+        ERROR("Failed to capture");
         return false;
     }
     DEBUG("Done\n");
 
-    return this->GetCMDResult(USB_REQ_CAPTURE);
+    return true;
 }
 
 void SSPRO::CancelCapture()
 {
     DEBUG("Attempting to cancel capture...");
-    int txCount;
-    unsigned char data[6] = { START_BYTE, USB_REQ_ABORT, 0x00, 0x00, 0x00, 0x00 };
-    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
-    if (result < 0)
-        ERROR("Failed to cancel capture, result = %d", result);
+    if (!this->SendCMD( USB_REQ_ABORT, 0x00, 0x00, 0x00, 0x00 ))
+        ERROR("Failed to cancel capture");
     else
         DEBUG("Done\n");
-
-    this->GetCMDResult(USB_REQ_ABORT);
 }
 
-void SSPRO::DownloadFrame()
+bool SSPRO::DownloadFrame()
 {
     if (!frameReady)
-        return;
+        return false;
 
     DEBUG("Requesting frame download...");
-    int txCount;
-    unsigned char data[6] = { START_BYTE, USB_REQ_DOWNLOAD, 0x00, 0x00, 0x00, 0x00 };
-    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
-    if (result < 0)
+    if (!this->SendCMD( USB_REQ_DOWNLOAD, 0x00, 0x00, 0x00, 0x00 ))
     {
-        ERROR("Failed to start download, result = %d", result);
-        return;
+        ERROR("Failed to start download");
+        return false;
     }
     DEBUG("Done\n");
-
-    this->GetCMDResult(USB_REQ_DOWNLOAD);
 
     DEBUG("Waiting for data from camera...");
     int rxCount;
@@ -296,17 +291,17 @@ void SSPRO::DownloadFrame()
     // Loop through until we get a partial buffer of data
     do
     {
-        result = libusb_bulk_transfer(this->device, USB_RX_ENDPOINT, rxData, BUFFER_SIZE, &rxCount, USB_TIMEOUT);
+        int result = libusb_bulk_transfer(this->device, USB_RX_ENDPOINT, rxData, BUFFER_SIZE, &rxCount, USB_TIMEOUT);
         if (result < 0)
         {
             ERROR("Failed to download image, result = %d", result);
             free(rxData);
-            return;
+            return false;
         }
 
         DEBUG(".");
         memcpy(pointer, rxData, rxCount);
-        pointer += BUFFER_SIZE;
+        pointer += rxCount; // Using BUFFER_SIZE here will push it off the end of the object on the last packet
     } while (rxCount == BUFFER_SIZE);
     free(rxData);
     DEBUG("Done\n");
@@ -318,25 +313,22 @@ void SSPRO::DownloadFrame()
     lastImage.width = IMAGE_WIDTH;
     lastImage.height = IMAGE_HEIGHT;
     DEBUG("Done\n");
+
+    return true;
 }
 
 void SSPRO::SetDIO()
 {
     DEBUG("Setting DIO...");
-    int txCount;
     unsigned char dio =0x00;
     if (fanHigh)
         dio |= 0x02;
     if (coolerOn)
         dio |= 0x01;
-    unsigned char data[6] = { START_BYTE, USB_REQ_SET_DIO, dio, 0x00, 0x00, 0x00 };
-    int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
-    if (result < 0)
-        ERROR("Failed to set DIO, result = %d", result);
+    if (!this->SendCMD( USB_REQ_SET_DIO, dio, 0x00, 0x00, 0x00 ))
+        ERROR("Failed to set DIO");
     else
         DEBUG("Done\n");
-
-    this->GetCMDResult(USB_REQ_SET_DIO);
 }
 
 void SSPRO::Init()

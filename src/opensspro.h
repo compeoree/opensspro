@@ -50,7 +50,7 @@ namespace OpenSSPRO
     {
     private:
         libusb_device_handle* device;
-        rawImage lastImage;
+        struct rawImage lastImage;
         ReadOutSpeed readoutSpeed;
         bool fanHigh;
         bool coolerOn;
@@ -59,8 +59,9 @@ namespace OpenSSPRO
 
         void Init();
         void SetupFrame();
-        void DownloadFrame();
+        bool DownloadFrame();
         void SetDIO();
+        bool SendCMD(unsigned char cmd, unsigned char data0, unsigned char data1, unsigned char data2, unsigned char data3);
         bool GetCMDResult(unsigned char cmd);
 
     public:
