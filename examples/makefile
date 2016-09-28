@@ -18,11 +18,13 @@ help:
 	@echo ""
 	@echo "      opensspro   -  Build the main library"
 	@echo "      printStatus -  Connect to camera and print status bytes"
+	@echo "      capture     -  Expose the CCD for 120 seconds"
+	@echo "      cancel      -  Cancel the capture"
 	@echo ""
 
 
 # Make everything
-all: printStatus
+all: printStatus capture cancel
 
 	
 # Create the build folder so we keep the repo clean
@@ -41,6 +43,15 @@ opensspro: setup
 printStatus: setup opensspro
 	$(CC) $(CFLAGS) status_test.cpp -lusb-1.0 -o $(OUTPUT_FOLDER)/status_test.o
 	$(CC) $(OUTPUT_FOLDER)/status_test.o $(OUTPUT_FOLDER)/opensspro.o -lusb-1.0 -o $(OUTPUT_FOLDER)/printStatus
+
+
+capture: setup opensspro
+	$(CC) $(CFLAGS) capture_test.cpp -lusb-1.0 -o $(OUTPUT_FOLDER)/capture_test.o
+	$(CC) $(OUTPUT_FOLDER)/capture_test.o $(OUTPUT_FOLDER)/opensspro.o -lusb-1.0 -o $(OUTPUT_FOLDER)/capture
+
+cancel: setup opensspro
+	$(CC) $(CFLAGS) cancel_test.cpp -lusb-1.0 -o $(OUTPUT_FOLDER)/cancel_test.o
+	$(CC) $(OUTPUT_FOLDER)/cancel_test.o $(OUTPUT_FOLDER)/opensspro.o -lusb-1.0 -o $(OUTPUT_FOLDER)/cancel
 
 
 # Undo undo undo
