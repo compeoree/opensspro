@@ -207,6 +207,10 @@ _Data0, Data1, Data3, Data4, and Data5 = Usually 0x00_
 
 _Data2 = Usually 0x01_
 
+**Description:**
+
+This command is followed up by bulk reads until the return packet is less than 1024 bytes in length. Image data is sent as rows. For a full sensor image, each row starts with 18 bytes of zeros and is followed by 3110 pixels (2 bytes per pixel). 2061 rows are transmitted.
+
 **Example:**
 
 | TX | RX |
