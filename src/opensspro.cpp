@@ -285,6 +285,7 @@ bool SSPRO::DownloadFrame()
 
     DEBUG("Waiting for data from camera...");
     int rxCount;
+    int rxTotal = 0;
     unsigned char* rxData = (unsigned char*)malloc(BUFFER_SIZE);
     unsigned char* newImage = (unsigned char*)malloc(MAX_TRANSFER_SIZE);
     unsigned char* pointer = newImage;
@@ -302,17 +303,19 @@ bool SSPRO::DownloadFrame()
         DEBUG(".");
         memcpy(pointer, rxData, rxCount);
         pointer += rxCount; // Using BUFFER_SIZE here will push it off the end of the object on the last packet
+        rxTotal += rxCount;
     } while (rxCount == BUFFER_SIZE);
     free(rxData);
-    DEBUG("Done\n");
+    DEBUG("Done (Received %d bytes)\n", rxTotal);
 
     DEBUG("Updating lastImage...");
     if (lastImage.data)
         free(lastImage.data);
     lastImage.data = newImage;
+    lastImage.dataSize = rxTotal;
     lastImage.width = IMAGE_WIDTH;
     lastImage.height = IMAGE_HEIGHT;
-    DEBUG("Done\n");
+    DEBUG("Done (Data Size=%lu, Width=%d, Height=%d)\n", sizeof(lastImage.data), lastImage.width, lastImage.height);
 
     return true;
 }

@@ -38,6 +38,7 @@ namespace OpenSSPRO
     struct rawImage {
         unsigned int width;
         unsigned int height;
+        unsigned int dataSize;
         unsigned char* data;
     };
 
