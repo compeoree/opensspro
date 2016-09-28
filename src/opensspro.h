@@ -55,6 +55,7 @@ namespace OpenSSPRO
         bool fanHigh;
         bool coolerOn;
         bool capturing;
+        bool frameReady;
 
         void Init();
         void SetupFrame();

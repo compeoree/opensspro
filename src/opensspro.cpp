@@ -157,18 +157,21 @@ bool SSPRO::GetCMDResult(unsigned char cmd)
         return false;
     }
 
-    if (rxData[1] != cmd)
+    if (rxData[2] != cmd)
     {
         ERROR("Mismatched command type, RX:%d vs CMD:%d", rxData[1], cmd);
         return false;
     }
 
-    switch (rxData[1])
+    switch (rxData[2])
     {
         case USB_REQ_STATUS:
             DEBUG("Found Status Result\n");
             DEBUG("Data: %02x, %02x, %02x, %02x, %02x, %02x, %02x, %02x\n",
                     rxData[0], rxData[1], rxData[2], rxData[3], rxData[4], rxData[5], rxData[6], rxData[7]);
+            capturing = (rxData[4] & 0x01) == 0x01;
+            frameReady = (rxData[4] & 0x02) == 0x02;
+            DEBUG("Capturing = %d, FrameReady = %d\n", capturing, frameReady);
             return true;
             break;
         case USB_REQ_SET_FRAME:
@@ -225,7 +228,7 @@ struct rawImage* SSPRO::Capture(int ms)
     sleep(ms+100);
 
     // while status == busy
-    while (this->capturing)
+    while (!this->frameReady)
     {
         this->GetStatus();
         sleep(500);
@@ -337,6 +340,7 @@ void SSPRO::Init()
     DEBUG("Initializing camera...");
     fanHigh = false;
     coolerOn = true;
+    frameReady = false;
     readoutSpeed = READOUT_FASTEST;
     DEBUG("Done\n");
 
