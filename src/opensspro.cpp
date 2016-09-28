@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <libusb-1.0/libusb.h>
-#include <time.h>
 #include <unistd.h>
 
 #include "opensspro.h"
@@ -225,13 +224,13 @@ struct rawImage* SSPRO::Capture(int ms)
         return NULL;
 
     // Wait capture time + 100 ms
-    sleep(ms+100);
+    usleep((ms+100)*1000);
 
     // while status == busy
     while (!this->frameReady)
     {
         this->GetStatus();
-        sleep(500);
+        usleep(500*1000);
     }
 
     this->DownloadFrame();
