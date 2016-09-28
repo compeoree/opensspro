@@ -24,11 +24,32 @@ It is anticipated that this driver will allow embedded systems the ability to ca
 ## Technical Information
 Basic information about the sensor and associated hardware can be found on the product page on [Orion Telescopes & Binoculars Website](http://www.telescope.com/Orion-StarShoot-Pro-V20-Deep-Space-Color-CCD-Imaging-Camera/p/52085.uts).
 
-Information below was gathered by capturing data on the USB port.
+
+### CCD Chip Info
+Pixel Size: 7.8 um
+&nbsp;
+
+| | | | |
+| --- | --- | --- | --- |
+| Gb | B | Gb | B |
+| R | Gr | R | Gr |
+| Gb | B | Gb | B |
+| R | Gr | R | Gr |
+
+&nbsp;
+
+| Pixels | H (Front / Back) | V (Front / Back) |
+| --- | --- | --- |
+| Total (Light+Black) | 3110 | 2030 |
+| Black       | 70 (20/50) | 6 (4/2) |
+| Effective (Light)  | 3040 | 2024 |
+| Active      | 3032 | 2016 |
+| Recommended | 3000 | 2000 |
 
 &nbsp;
 
 ### USB Capture Software Configuration
+USB information was gathered by capturing data on the USB port using the following software:
   * Wireshark and its bundled version of USBPcap
   * Windows 10 (or similar)
   * Bundled version of MaximDL
