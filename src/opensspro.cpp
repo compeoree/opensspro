@@ -29,9 +29,10 @@
 #define USB_CONTROL_TYPE 0x03
 #define START_BYTE       0xA5
 
-#define IMAGE_WIDTH  3040
-#define IMAGE_HEIGHT 2024
-#define BUFFER_SIZE  1024
+#define IMAGE_WIDTH       3040
+#define IMAGE_HEIGHT      2024
+#define BUFFER_SIZE       1024
+#define MAX_TRANSFER_SIZE 12677612
 
 using namespace OpenSSPRO;
 
@@ -243,7 +244,7 @@ bool SSPRO::StartCapture(int ms)
 
     DEBUG("Starting capture...");
     int txCount;
-    unsigned char data[6] = { START_BYTE, USB_REQ_CAPTURE, 0x01, 0x04, 0x92, 0x02 }; // 120s Color 1x1 binning
+    unsigned char data[6] = { START_BYTE, USB_REQ_CAPTURE, 0x00, 0x26, 0x39, 0x02 }; // 10s Color 1x1 binning
     int result = libusb_bulk_transfer(this->device, USB_CMD_ENDPOINT, data, 6, &txCount, USB_TIMEOUT);
     if (result < 0)
     {
@@ -270,7 +271,10 @@ void SSPRO::CancelCapture()
 }
 
 void SSPRO::DownloadFrame()
-{ // TODO: Check camera status before trying to download
+{
+    if (!frameReady)
+        return;
+
     DEBUG("Requesting frame download...");
     int txCount;
     unsigned char data[6] = { START_BYTE, USB_REQ_DOWNLOAD, 0x00, 0x00, 0x00, 0x00 };
@@ -287,7 +291,7 @@ void SSPRO::DownloadFrame()
     DEBUG("Waiting for data from camera...");
     int rxCount;
     unsigned char* rxData = (unsigned char*)malloc(BUFFER_SIZE);
-    unsigned char* newImage = (unsigned char*)malloc(IMAGE_WIDTH * IMAGE_HEIGHT);
+    unsigned char* newImage = (unsigned char*)malloc(MAX_TRANSFER_SIZE);
     unsigned char* pointer = newImage;
     // Loop through until we get a partial buffer of data
     do
@@ -300,6 +304,7 @@ void SSPRO::DownloadFrame()
             return;
         }
 
+        DEBUG(".");
         memcpy(pointer, rxData, rxCount);
         pointer += BUFFER_SIZE;
     } while (rxCount == BUFFER_SIZE);
