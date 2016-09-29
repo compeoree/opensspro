@@ -183,8 +183,11 @@ _Data4 = Usually 0x00_
 
 **Description:**
 
-Units are milliseconds when time is less than 10s.<br>
-Time value seems offset by some random value, which seems to change after a restart of MaximDL. One example uses a setpoint of 6696.9s in MaximDL which produces a packet value of 0xfffe.<br>
+Units are milliseconds when time is less than 10s.
+
+Time value seems offset by some random value, which appears to change after a restart of MaximDL. One example uses a setpoint of 6696.9s in MaximDL which produces a packet value of 0xfffe.
+
+When time is 8 seconds or less, MaximDL/camera takes two individual frames of equal exposure time. Cmd3 byte == 0x00 for first exposure and 0x01 for second exposure. Don't know if it's odd/even frames or full frames for each exposure (data length suggests odd/even frames).
 
 **Example:**
 
