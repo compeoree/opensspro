@@ -315,7 +315,7 @@ bool SSPRO::DownloadFrame()
     lastImage.dataSize = rxTotal;
     lastImage.width = IMAGE_WIDTH;
     lastImage.height = IMAGE_HEIGHT;
-    DEBUG("Done (Data Size=%lu, Width=%d, Height=%d)\n", sizeof(lastImage.data), lastImage.width, lastImage.height);
+    DEBUG("Done (Data Size=%d, Width=%d, Height=%d)\n", lastImage.dataSize, lastImage.width, lastImage.height);
 
     return true;
 }

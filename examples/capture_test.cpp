@@ -24,7 +24,7 @@ int main()
     camera->GetStatus();
     OpenSSPRO::rawImage* newImage = camera->Capture(10000);
     FILE* newFile = fopen("raw.image", "w");
-    fwrite(newImage->data, 1, sizeof(newImage->data), newFile);
+    fwrite(newImage->data, 1, newImage->dataSize, newFile);
     fclose(newFile);
     camera->Disconnect();
 }
