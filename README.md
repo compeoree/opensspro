@@ -169,9 +169,9 @@ _Set readout speed, shutter time, and other data_
 
 | Cmd0 | Cmd1 & Cmd2 | Cmd3 |
 | ------------------- |:----------------:|:-------------------:|
-| Bits 7-4 = Always 0 | 0x0001 to 0xFFFF | 0x00=Time <= 8.000s |
-| Bits 3-1 = Readout Speed (Fast=0...Slow=7) | Time value | 0x02=Time >= 8.001s |
-| Bit 0 = Time Units (0=ms, 1=0.1s) |                  | 0x03=2x2 Binning?   |
+| Bits 7-4 = Always 0 | 0x0001 to 0xFFFF | 0x00 or 0x01 - Time <= 8.000s |
+| Bits 3-1 = Readout Speed (Fast=0...Slow=7) | Time value | 0x02 - Time >= 8.001s |
+| Bit 0 = Time Units (0=ms, 1=0.1s) |                  | 0x03 - 2x2 Binning? |
 <br>
 **RX Data:** ```0xA5 Data0 0x0B Data1 Data2 Data3 Data4 Data5```
 
