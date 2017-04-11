@@ -31,19 +31,38 @@ int main()
     int rowCount = 0;
     int thisZeroIndex = 0;
     int lastZeroIndex = 0;
+    int byteCount = 0;
     for (long i=0; i<result; i++)
     {
+        if (++byteCount == 6220)
+        {
+            byteCount = 0;
+            zeroCount = 0;
+            printf("...good row\n");
+            continue;
+        }
+
         if (data[i] == 0x00)
         {
             if (++zeroCount == 18)
             {
                 thisZeroIndex = i - 17;
-                printf("Found row %d at index 0x%X, which is %d bytes since previous row\n", rowCount++, thisZeroIndex, thisZeroIndex - lastZeroIndex);
-                lastZeroIndex = thisZeroIndex;
+                if (byteCount == zeroCount)
+                {
+                    printf("Found row %d at index 0x%X, which is %d bytes since previous row", rowCount++, thisZeroIndex, thisZeroIndex - lastZeroIndex);
+                    lastZeroIndex = thisZeroIndex;
+                }
+                else
+                    printf("...glitch...");
+                zeroCount = 0; // reset counter so a start byte of value 0x00 doesn't trip this again...
             }
         }
         else
+        {
+            if (zeroCount > 2 && zeroCount != 18)
+                printf("Found %d zeros in a row at location 0x%X\n", zeroCount, i);
             zeroCount = 0;
+        }
     }
     free(data);
 }
