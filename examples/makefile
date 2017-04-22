@@ -7,7 +7,8 @@
 
 
 CC=g++
-CFLAGS=-c -Wall -D VERBOSE
+CFLAGS=-c -Wall -D VERBOSE -I/home/lmccarthy/cfitsio/include -I/usr/local/include/CCfits
+LFLAGS=-Wl,-rpath -Wl,/usr/local/lib
 OUTPUT_FOLDER=build
 
 help:
@@ -56,7 +57,7 @@ cancel: setup opensspro
 
 parser: setup
 	$(CC) $(CFLAGS) parseRawImage.cpp -lusb-1.0 -o $(OUTPUT_FOLDER)/parseRawImage.o
-	$(CC) $(OUTPUT_FOLDER)/parseRawImage.o -lusb-1.0 -o $(OUTPUT_FOLDER)/parser
+	$(CC) $(OUTPUT_FOLDER)/parseRawImage.o -lCCfits -lusb-1.0 -o $(OUTPUT_FOLDER)/parser
 
 
 # Undo undo undo
