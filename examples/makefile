@@ -7,7 +7,7 @@
 
 
 CC=g++
-CFLAGS=-c -Wall -D VERBOSE -I/home/lmccarthy/cfitsio/include -I/usr/local/include/CCfits
+CFLAGS=-c -Wall -D VERBOSE -I/usr/local/include/cfitsio -I/usr/local/include/CCfits
 LFLAGS=-Wl,-rpath -Wl,/usr/local/lib
 OUTPUT_FOLDER=build
 

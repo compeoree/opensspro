@@ -15,6 +15,20 @@ It is anticipated that this driver will allow embedded systems the ability to ca
 &nbsp;
 ### Dependencies
   * libusb-1.0
+  * cfitsio3410
+  * CCfits-2.5
+
+&nbsp;
+### Compiling cfitsio Library
+./configure --prefix=/usr/local
+make -j3
+sudo make install
+
+&nbsp;
+### Compiling CCfits Library
+./configure
+make -j3
+sudo make install
 
 &nbsp;
 ### Indilib Support
