@@ -31,6 +31,16 @@ make -j3
 sudo make install
 
 &nbsp;
+### Add local library to search path
+sudo nano /etc/ld.so.conf.d/fits.conf
+
+Add the following line to fits.conf
+/usr/local/lib
+
+Save and exit then run
+sudo ldconfig
+
+&nbsp;
 ### Indilib Support
 [indilib](http://www.indilib.org/) support is being worked on. Current progress can be found in the [sspro branch](https://github.com/compeoree/indi/tree/sspro) of my indilib fork.
 
