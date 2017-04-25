@@ -237,7 +237,7 @@ _Data2 = Usually 0x01_
 **Description:**
 
 This command is followed up by bulk reads until the return packet is less than 1024 bytes in length. Image data is sent as rows. For a full sensor image, each row starts with 18 bytes of zeros and is followed by 3110 pixels (2 bytes per pixel). 2032 rows are transmitted, 1016 odd rows first, followed by evens.
-![alt text](https://github.com/compeoree/opensspro/raw/master/src/examples/whirlpool.jpg "Raw image")
+![alt text](https://github.com/compeoree/opensspro/raw/master/examples/whirlpool.png "Raw image")
 
 **Example:**
 
