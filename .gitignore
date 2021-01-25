@@ -1,3 +1,5 @@
 build
 *.swp
 *.autosave
+3rdparty/CCfits
+3rdparty/cfitsio
