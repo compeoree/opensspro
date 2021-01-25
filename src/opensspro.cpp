@@ -251,7 +251,7 @@ bool SSPRO::StartCapture(int ms)
     this->SetupFrame();
 
     DEBUG("Starting capture...");
-    if (!this->SendCMD( USB_REQ_CAPTURE, 0x00, 0x26, 0x39, 0x02 )) // 10s Color 1x1 binning
+    if (!this->SendCMD( USB_REQ_CAPTURE, 0x08, 0x01, 0x2C, 0x02 )) // 30s Color 1x1 binning
     {
         ERROR("Failed to capture");
         return false;
@@ -300,7 +300,7 @@ bool SSPRO::DownloadFrame()
             return false;
         }
 
-        DEBUG(".");
+        //DEBUG(".");
         memcpy(pointer, rxData, rxCount);
         pointer += rxCount; // Using BUFFER_SIZE here will push it off the end of the object on the last packet
         rxTotal += rxCount;
